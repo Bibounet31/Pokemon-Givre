@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { chargerFeuilles, sourceDecor, sourcePerso, SPRITE_JOUEUR, TUILE, type Feuilles } from '../sprites'
-import type { Carte, Position } from '../types'
+import type { Carte, Position } from '../api/types'
 
-// Fenêtre de vue façon Game Boy : 15 × 11 cases, agrandies ×3.
+// Game Boy-like viewport: 15 × 11 tiles, scaled ×3.
 const VUE_L = 15
 const VUE_H = 11
 const ECHELLE = 3
@@ -12,6 +12,7 @@ interface Props {
   joueur: Position
 }
 
+/** Canvas rendering of the map: ground, decor, characters, player, then roofs. */
 export function VueCarte({ carte, joueur }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [feuilles, setFeuilles] = useState<Feuilles | null>(null)
@@ -30,7 +31,7 @@ export function VueCarte({ carte, joueur }: Props) {
     ctx.fillStyle = '#0F380F'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    // Caméra centrée sur le joueur, bloquée aux bords ; carte centrée si plus petite que la vue.
+    // Camera centred on the player, clamped to the edges; a map smaller than the view is centred.
     const camera = (pos: number, taille: number, vue: number) =>
       taille <= vue ? -(vue - taille) / 2 : Math.min(Math.max(pos - Math.floor(vue / 2), 0), taille - vue)
     const cx = camera(joueur.x, carte.largeur, VUE_L)
@@ -57,7 +58,7 @@ export function VueCarte({ carte, joueur }: Props) {
       if (typeof o.proprietes.sprite === 'number') dessinerPerso(o.proprietes.sprite, o.x, o.y)
     }
     dessinerPerso(SPRITE_JOUEUR, joueur.x, joueur.y)
-    dessinerCalque(carte.calques.toits) // les toits passent par-dessus le joueur
+    dessinerCalque(carte.calques.toits) // roofs are drawn above the player
   }, [carte, joueur, feuilles])
 
   if (erreur) return <p className="erreur">{erreur}</p>

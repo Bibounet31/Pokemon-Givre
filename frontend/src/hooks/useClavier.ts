@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
-import type { Direction } from '../types'
+import type { Direction } from '../api/types'
 
-// Flèches + ZQSD (AZERTY) + WASD (QWERTY)
-const TOUCHES: Record<string, Direction> = {
+// Arrows + ZQSD (AZERTY) + WASD (QWERTY)
+const DIRECTIONS: Record<string, Direction> = {
   ArrowUp: 'up',
   ArrowDown: 'down',
   ArrowLeft: 'left',
@@ -14,23 +14,37 @@ const TOUCHES: Record<string, Direction> = {
   a: 'left',
   d: 'right',
 }
+const TOUCHES_VALIDER = new Set([' ', 'Enter'])
 
-/** Appelle `surDirection` à chaque appui (touche maintenue = répétition du navigateur). */
-export function useClavier(surDirection: (d: Direction) => void, actif: boolean) {
-  const rappel = useRef(surDirection)
+interface Actions {
+  surDirection: (direction: Direction) => void
+  /** Space or Enter: talk / interact with the tile in front of the player. */
+  surValider: () => void
+}
+
+/** Keyboard controls of the map. A held arrow key repeats (browser key repeat). */
+export function useClavier(actions: Actions, actif: boolean) {
+  const rappels = useRef(actions)
   useEffect(() => {
-    rappel.current = surDirection
+    rappels.current = actions
   })
 
   useEffect(() => {
     if (!actif) return
-    const ecoute = (e: KeyboardEvent) => {
-      const direction = TOUCHES[e.key.length === 1 ? e.key.toLowerCase() : e.key]
+    const ecouter = (e: KeyboardEvent) => {
+      if (TOUCHES_VALIDER.has(e.key)) {
+        // Let Space/Enter activate a focused button normally.
+        if (e.repeat || e.target instanceof HTMLButtonElement) return
+        e.preventDefault()
+        rappels.current.surValider()
+        return
+      }
+      const direction = DIRECTIONS[e.key.length === 1 ? e.key.toLowerCase() : e.key]
       if (!direction) return
       e.preventDefault()
-      rappel.current(direction)
+      rappels.current.surDirection(direction)
     }
-    window.addEventListener('keydown', ecoute)
-    return () => window.removeEventListener('keydown', ecoute)
+    window.addEventListener('keydown', ecouter)
+    return () => window.removeEventListener('keydown', ecouter)
   }, [actif])
 }

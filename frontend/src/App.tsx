@@ -1,141 +1,69 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { api, ErreurApi } from './api'
+import { BoiteDialogue } from './components/BoiteDialogue'
 import { ChoixStarter } from './components/ChoixStarter'
+import { EcranCombat } from './components/EcranCombat'
+import { EcranFin } from './components/EcranFin'
 import { VueCarte } from './components/VueCarte'
 import { useClavier } from './hooks/useClavier'
-import type { Carte, Direction, Partie, Starter } from './types'
+import { usePartie } from './hooks/usePartie'
 
-const CLE_PARTIE = 'yboost.partie'
-
-function lireIdSauvegarde(): string | null {
-  try {
-    return localStorage.getItem(CLE_PARTIE)
-  } catch {
-    return null
-  }
-}
-function sauverId(id: string | null) {
-  try {
-    if (id) localStorage.setItem(CLE_PARTIE, id)
-    else localStorage.removeItem(CLE_PARTIE)
-  } catch {
-    /* stockage indisponible : on ne reprendra pas la partie, ce n'est pas grave */
-  }
-}
-
+/** Layout of the game: one screen per run mode, chosen from the state sent by the server. */
 export default function App() {
-  const [partie, setPartie] = useState<Partie | null>(null)
-  const [starters, setStarters] = useState<Starter[]>([])
-  const [carte, setCarte] = useState<Carte | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
-  const [erreur, setErreur] = useState<string | null>(null)
-  const enCours = useRef(false)
+  const jeu = usePartie()
+  const { partie, carte } = jeu
 
-  const signaler = (e: unknown) => setErreur(e instanceof Error ? e.message : String(e))
+  useClavier({ surDirection: jeu.deplacer, surValider: jeu.interagir }, partie?.mode === 'exploration')
 
-  // Reprise d'une partie existante (le serveur garde les parties en mémoire tant qu'il tourne).
-  useEffect(() => {
-    const id = lireIdSauvegarde()
-    if (!id) return
-    api.lirePartie(id).then(setPartie, (e) => {
-      if (e instanceof ErreurApi && e.statut === 404) sauverId(null)
-      else signaler(e)
-    })
-  }, [])
-
-  useEffect(() => {
-    if (partie?.mode === 'choix_starter' && starters.length === 0) api.starters().then(setStarters, signaler)
-  }, [partie?.mode, starters.length])
-
-  const idCarte = partie?.position.carte
-  useEffect(() => {
-    if (!idCarte) return
-    api.carte(idCarte).then(setCarte, signaler)
-  }, [idCarte])
-
-  const nouvellePartie = async () => {
-    setErreur(null)
-    try {
-      const p = await api.creerPartie()
-      sauverId(p.id)
-      setCarte(null)
-      setPartie(p)
-    } catch (e) {
-      signaler(e)
+  const ecran = () => {
+    if (!partie) {
+      return (
+        <section className="boite titre">
+          <p>Une aventure en mode Pixel rétro.</p>
+          <button className="bouton" onClick={jeu.nouvellePartie}>
+            Nouvelle partie
+          </button>
+        </section>
+      )
+    }
+    switch (partie.mode) {
+      case 'choix_starter':
+        return <ChoixStarter starters={jeu.starters} onChoix={jeu.choisirStarter} />
+      case 'exploration':
+        // Wait for the new map after a map change, so the player is never drawn on the old one.
+        if (!carte || carte.id !== partie.position.carte) return null
+        return (
+          <>
+            <div className="cadre-ecran">
+              <div className="nom-zone">{carte.titre}</div>
+              <VueCarte carte={carte} joueur={partie.position} />
+            </div>
+            <BoiteDialogue texte={jeu.message} />
+          </>
+        )
+      case 'combat':
+        return <EcranCombat partie={partie} journal={jeu.journal} onAction={jeu.agir} />
+      case 'fin':
+        return <EcranFin onRejouer={jeu.nouvellePartie} />
     }
   }
-
-  const choisir = async (pokemonId: number) => {
-    if (!partie) return
-    try {
-      const p = await api.choisirStarter(partie.id, pokemonId)
-      setPartie(p)
-      setMessage(`${p.equipe[0].nom_fr} rejoint ton équipe !`)
-    } catch (e) {
-      signaler(e)
-    }
-  }
-
-  const deplacer = useCallback(
-    async (direction: Direction) => {
-      if (!partie || enCours.current) return // un seul déplacement à la fois
-      enCours.current = true
-      try {
-        const r = await api.deplacer(partie.id, direction)
-        setPartie(r.partie)
-        if (r.evenement.type === 'changement_carte') setMessage(null)
-        else if (r.dans_les_herbes) setMessage('Les herbes bruissent…')
-        else setMessage(null)
-      } catch (e) {
-        signaler(e)
-      } finally {
-        enCours.current = false
-      }
-    },
-    [partie],
-  )
-
-  useClavier(deplacer, partie?.mode === 'exploration')
 
   return (
     <main className="jeu">
       <header>
         <h1>Yboost Pokémon</h1>
         {partie && (
-          <button className="bouton petit" onClick={nouvellePartie}>
+          <button className="bouton petit" onClick={jeu.nouvellePartie}>
             Nouvelle partie
           </button>
         )}
       </header>
 
-      {erreur && (
+      {jeu.erreur && (
         <p className="erreur" role="alert">
-          {erreur}
+          {jeu.erreur}
         </p>
       )}
 
-      {!partie && (
-        <section className="boite titre">
-          <p>Une aventure en mode Pixel rétro.</p>
-          <button className="bouton" onClick={nouvellePartie}>
-            Nouvelle partie
-          </button>
-        </section>
-      )}
-
-      {partie?.mode === 'choix_starter' && <ChoixStarter starters={starters} onChoix={choisir} />}
-
-      {partie?.mode === 'exploration' && carte && carte.id === partie.position.carte && (
-        <>
-          <div className="cadre-ecran">
-            <div className="nom-zone">{carte.titre}</div>
-            <VueCarte carte={carte} joueur={partie.position} />
-          </div>
-          <div className="boite dialogue">
-            {message ?? 'Flèches ou ZQSD pour te déplacer.'}
-          </div>
-        </>
-      )}
+      {ecran()}
     </main>
   )
 }
