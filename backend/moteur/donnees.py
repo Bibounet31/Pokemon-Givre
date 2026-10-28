@@ -1,4 +1,4 @@
-"""Reference data (maps, starters…), read from disk once and cached.
+"""Reference data (maps, starters, type chart…), read from disk once and cached.
 
 PokéAPI is never called while playing: its data is imported once into
 ``backend/data/`` by a script (Notion task 10).
@@ -35,7 +35,6 @@ def starters() -> dict[int, Starter]:
 
 
 @cache
-def types() -> dict[str, dict[str, float]]:
-    """Load and cache the Pokémon type effectiveness chart."""
-    chemin = DOSSIER_DONNEES / "types.json"
-    return json.loads(chemin.read_text(encoding="utf-8"))
+def table_des_types() -> dict[str, dict[str, float]]:
+    """Type effectiveness chart: ``table[attack type][defending type]`` is 0, 0.5, 1 or 2."""
+    return json.loads((DOSSIER_DONNEES / "types.json").read_text(encoding="utf-8"))
