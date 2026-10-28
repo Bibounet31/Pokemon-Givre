@@ -7,4 +7,5 @@
 - ``pokemon``: stats and creation of team Pokémon
 - ``types``: type effectiveness multiplier
 - ``exploration``: moving on the map
+- ``aleatoire``: reproducible random draws from the run's seed
 """

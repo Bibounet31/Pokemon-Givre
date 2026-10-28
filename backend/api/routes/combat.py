@@ -14,7 +14,7 @@ router = APIRouter(prefix="/runs/{run_id}/battle", tags=["combat"])
     "/actions",
     responses={**ERREURS_ACTION, 501: {"model": Erreur, "description": "Pas encore implémenté"}},
 )
-def agir(partie: PartieEnCombat, action: ActionCombat) -> ReponseCombat:
+async def agir(partie: PartieEnCombat, action: ActionCombat) -> ReponseCombat:
     """Play one battle turn: the server resolves both sides and returns the log.
 
     Contract only: implemented by Notion tasks 20, 22, 24, 25, 28, 29 and 67.
