@@ -1,0 +1,1455 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Yboost Pokémon API",
+    "version": "0.2.0"
+  },
+  "paths": {
+    "/starters": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Lister Starters",
+        "operationId": "lister_starters_starters_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Starter"
+                  },
+                  "type": "array",
+                  "title": "Response Lister Starters Starters Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/maps/{map_id}": {
+      "get": {
+        "tags": [
+          "catalogue"
+        ],
+        "summary": "Lire Carte",
+        "operationId": "lire_carte_maps__map_id__get",
+        "parameters": [
+          {
+            "name": "map_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Map Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CarteReponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Carte inconnue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs": {
+      "post": {
+        "tags": [
+          "parties"
+        ],
+        "summary": "Creer Partie",
+        "operationId": "creer_partie_runs_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/NouvellePartie"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Demande"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}": {
+      "get": {
+        "tags": [
+          "parties"
+        ],
+        "summary": "Lire Partie",
+        "operationId": "lire_partie_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partie"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Partie inconnue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/starter": {
+      "post": {
+        "tags": [
+          "parties"
+        ],
+        "summary": "Choisir Starter",
+        "operationId": "choisir_starter_runs__run_id__starter_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChoixStarter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Partie"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Partie inconnue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action impossible dans le mode actuel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Pokémon qui n'est pas un starter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/move": {
+      "post": {
+        "tags": [
+          "exploration"
+        ],
+        "summary": "Deplacer Joueur",
+        "operationId": "deplacer_joueur_runs__run_id__move_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Deplacement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReponseDeplacement"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Partie inconnue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action impossible dans le mode actuel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/interact": {
+      "post": {
+        "tags": [
+          "exploration"
+        ],
+        "summary": "Interagir",
+        "description": "Talk to an NPC, open a chest, heal or challenge a trainer on the tile in front of the player.\n\nContract only: implemented by Notion task 64.",
+        "operationId": "interagir_runs__run_id__interact_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReponseInteraction"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Partie inconnue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action impossible dans le mode actuel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Pas encore implémenté",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{run_id}/battle/actions": {
+      "post": {
+        "tags": [
+          "combat"
+        ],
+        "summary": "Agir",
+        "description": "Play one battle turn: the server resolves both sides and returns the log.\n\nContract only: implemented by Notion tasks 20, 22, 24, 25, 28, 29 and 67.",
+        "operationId": "agir_runs__run_id__battle_actions_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ActionAttaquer"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ActionChanger"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ActionObjet"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ActionCapturer"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ActionFuir"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "attack": "#/components/schemas/ActionAttaquer",
+                    "switch": "#/components/schemas/ActionChanger",
+                    "item": "#/components/schemas/ActionObjet",
+                    "capture": "#/components/schemas/ActionCapturer",
+                    "flee": "#/components/schemas/ActionFuir"
+                  }
+                },
+                "title": "Action"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReponseCombat"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Partie inconnue",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Action impossible dans le mode actuel",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Pas encore implémenté",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erreur"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ActionAttaquer": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "attack",
+            "title": "Type"
+          },
+          "move_id": {
+            "type": "string",
+            "title": "Move Id",
+            "description": "One of the active Pokémon's moves, e.g. 'water-gun'."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "move_id"
+        ],
+        "title": "ActionAttaquer"
+      },
+      "ActionCapturer": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "capture",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "ActionCapturer"
+      },
+      "ActionChanger": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "switch",
+            "title": "Type"
+          },
+          "index": {
+            "type": "integer",
+            "exclusiveMaximum": 3.0,
+            "minimum": 0.0,
+            "title": "Index",
+            "description": "Index in partie.equipe."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "index"
+        ],
+        "title": "ActionChanger"
+      },
+      "ActionFuir": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "flee",
+            "title": "Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "ActionFuir"
+      },
+      "ActionObjet": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "item",
+            "title": "Type"
+          },
+          "objet": {
+            "type": "string",
+            "title": "Objet",
+            "description": "Item name from the bag, e.g. 'potion' or 'ether'."
+          },
+          "cible": {
+            "type": "integer",
+            "exclusiveMaximum": 3.0,
+            "minimum": 0.0,
+            "title": "Cible",
+            "description": "Index in partie.equipe.",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "objet"
+        ],
+        "title": "ActionObjet"
+      },
+      "AttaqueConnue": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "pp": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pp"
+          },
+          "pp_max": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Pp Max"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "pp",
+          "pp_max"
+        ],
+        "title": "AttaqueConnue",
+        "description": "A move known by a team member, with its remaining PP."
+      },
+      "AttaqueDeBase": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "PokéAPI move name, e.g. 'water-gun'."
+          },
+          "pp": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Pp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "pp"
+        ],
+        "title": "AttaqueDeBase",
+        "description": "A move a species can learn, with its maximum PP."
+      },
+      "Calques": {
+        "properties": {
+          "sol": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Sol"
+          },
+          "decor": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Decor"
+          },
+          "toits": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Toits",
+            "description": "Drawn above the player."
+          }
+        },
+        "type": "object",
+        "required": [
+          "sol",
+          "decor",
+          "toits"
+        ],
+        "title": "Calques",
+        "description": "Displayed tile layers, row by row (index = y * largeur + x). 0 = empty tile."
+      },
+      "CarteReponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "titre": {
+            "type": "string",
+            "title": "Titre"
+          },
+          "largeur": {
+            "type": "integer",
+            "title": "Largeur"
+          },
+          "hauteur": {
+            "type": "integer",
+            "title": "Hauteur"
+          },
+          "taille_tuile": {
+            "type": "integer",
+            "title": "Taille Tuile"
+          },
+          "calques": {
+            "$ref": "#/components/schemas/Calques"
+          },
+          "objets": {
+            "items": {
+              "$ref": "#/components/schemas/ObjetVisible"
+            },
+            "type": "array",
+            "title": "Objets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "titre",
+          "largeur",
+          "hauteur",
+          "taille_tuile",
+          "calques",
+          "objets"
+        ],
+        "title": "CarteReponse"
+      },
+      "ChoixStarter": {
+        "properties": {
+          "pokemon_id": {
+            "type": "integer",
+            "title": "Pokemon Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pokemon_id"
+        ],
+        "title": "ChoixStarter"
+      },
+      "CombatEnCours": {
+        "properties": {
+          "genre": {
+            "type": "string",
+            "enum": [
+              "sauvage",
+              "dresseur",
+              "tour"
+            ],
+            "title": "Genre"
+          },
+          "adversaires": {
+            "items": {
+              "$ref": "#/components/schemas/PokemonEquipe"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Adversaires"
+          },
+          "actif": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Actif",
+            "description": "Index of the player's Pokémon in battle (in partie.equipe).",
+            "default": 0
+          },
+          "actif_adverse": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Actif Adverse",
+            "description": "Index of the opponent's Pokémon in battle.",
+            "default": 0
+          },
+          "dresseur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dresseur",
+            "description": "Trainer key 'carte/nom', None for a wild Pokémon."
+          },
+          "numero_tour": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Numero Tour",
+            "default": 1
+          }
+        },
+        "type": "object",
+        "required": [
+          "genre",
+          "adversaires",
+          "actif",
+          "actif_adverse",
+          "dresseur",
+          "numero_tour"
+        ],
+        "title": "CombatEnCours",
+        "description": "The battle being fought, if the run is in ``combat`` mode."
+      },
+      "Deplacement": {
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down",
+              "left",
+              "right"
+            ],
+            "title": "Direction"
+          }
+        },
+        "type": "object",
+        "required": [
+          "direction"
+        ],
+        "title": "Deplacement"
+      },
+      "EntreeJournal": {
+        "properties": {
+          "texte": {
+            "type": "string",
+            "title": "Texte"
+          }
+        },
+        "type": "object",
+        "required": [
+          "texte"
+        ],
+        "title": "EntreeJournal",
+        "description": "One line of the battle log shown to the player."
+      },
+      "Erreur": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "Erreur",
+        "description": "Body of every 4xx/5xx response."
+      },
+      "Evenement": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "deplace",
+              "bloque",
+              "changement_carte",
+              "rencontre",
+              "dialogue",
+              "objet_obtenu",
+              "coffre_vide",
+              "soin",
+              "combat",
+              "rien"
+            ],
+            "title": "Type"
+          },
+          "carte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Carte",
+            "description": "Destination map of a 'changement_carte'."
+          },
+          "texte": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Texte",
+            "description": "Text to show in the dialogue box."
+          },
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet",
+            "description": "Item received with 'objet_obtenu'."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "carte",
+          "texte",
+          "objet"
+        ],
+        "title": "Evenement",
+        "description": "What happened during an action. A game failure (wall, empty chest) is an event, not an HTTP error."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Mode": {
+        "type": "string",
+        "enum": [
+          "choix_starter",
+          "exploration",
+          "combat",
+          "fin"
+        ],
+        "title": "Mode",
+        "description": "Top-level state of a run. Each route only works in one mode (otherwise 409)."
+      },
+      "NouvellePartie": {
+        "properties": {
+          "graine": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graine",
+            "description": "Fixed seed (tests, replays). Random when omitted."
+          }
+        },
+        "type": "object",
+        "title": "NouvellePartie"
+      },
+      "ObjetVisible": {
+        "properties": {
+          "nom": {
+            "type": "string",
+            "title": "Nom"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "x": {
+            "type": "integer",
+            "title": "X"
+          },
+          "y": {
+            "type": "integer",
+            "title": "Y"
+          },
+          "largeur": {
+            "type": "integer",
+            "title": "Largeur"
+          },
+          "hauteur": {
+            "type": "integer",
+            "title": "Hauteur"
+          },
+          "proprietes": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Proprietes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nom",
+          "type",
+          "x",
+          "y",
+          "largeur",
+          "hauteur",
+          "proprietes"
+        ],
+        "title": "ObjetVisible",
+        "description": "An object the front-end draws (NPC, trainer, nurse, chest)."
+      },
+      "Partie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/Mode"
+          },
+          "graine": {
+            "type": "integer",
+            "title": "Graine",
+            "description": "Seed of every random draw of the run, so it can be replayed."
+          },
+          "position": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "equipe": {
+            "items": {
+              "$ref": "#/components/schemas/PokemonEquipe"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Equipe"
+          },
+          "sac": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Sac",
+            "description": "Item name -> quantity."
+          },
+          "coffres_ouverts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true,
+            "title": "Coffres Ouverts",
+            "description": "Keys 'carte/nom' of opened chests."
+          },
+          "dresseurs_battus": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true,
+            "title": "Dresseurs Battus",
+            "description": "Keys 'carte/nom' of beaten trainers."
+          },
+          "dernier_soin": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Position"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where a defeat sends the player back."
+          },
+          "combat": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CombatEnCours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tour": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProgressionTour"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "None when no Tower attempt is in progress."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "mode",
+          "graine",
+          "position",
+          "equipe",
+          "sac",
+          "coffres_ouverts",
+          "dresseurs_battus",
+          "dernier_soin",
+          "combat",
+          "tour"
+        ],
+        "title": "Partie",
+        "description": "A run, kept in memory by the server."
+      },
+      "PokemonEquipe": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "nom": {
+            "type": "string",
+            "title": "Nom"
+          },
+          "nom_fr": {
+            "type": "string",
+            "title": "Nom Fr"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Types"
+          },
+          "niveau": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Niveau"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/Statistiques",
+            "description": "Stats at the current level; stats.pv is the maximum HP."
+          },
+          "pv": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pv",
+            "description": "Current HP, between 0 and stats.pv."
+          },
+          "attaques": {
+            "items": {
+              "$ref": "#/components/schemas/AttaqueConnue"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Attaques"
+          },
+          "ko": {
+            "type": "boolean",
+            "title": "Ko",
+            "description": "A knocked-out Pokémon can neither attack nor be sent into battle.",
+            "readOnly": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nom",
+          "nom_fr",
+          "types",
+          "niveau",
+          "stats",
+          "pv",
+          "attaques",
+          "ko"
+        ],
+        "title": "PokemonEquipe",
+        "description": "A Pokémon of a team (the player's or an opponent's)."
+      },
+      "Position": {
+        "properties": {
+          "carte": {
+            "type": "string",
+            "title": "Carte"
+          },
+          "x": {
+            "type": "integer",
+            "title": "X"
+          },
+          "y": {
+            "type": "integer",
+            "title": "Y"
+          },
+          "orientation": {
+            "type": "string",
+            "enum": [
+              "up",
+              "down",
+              "left",
+              "right"
+            ],
+            "title": "Orientation",
+            "default": "down"
+          }
+        },
+        "type": "object",
+        "required": [
+          "carte",
+          "x",
+          "y",
+          "orientation"
+        ],
+        "title": "Position"
+      },
+      "ProgressionTour": {
+        "properties": {
+          "victoires": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "title": "Victoires",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "victoires"
+        ],
+        "title": "ProgressionTour",
+        "description": "Progress of the current Battle Tower attempt."
+      },
+      "ReponseCombat": {
+        "properties": {
+          "partie": {
+            "$ref": "#/components/schemas/Partie"
+          },
+          "journal": {
+            "items": {
+              "$ref": "#/components/schemas/EntreeJournal"
+            },
+            "type": "array",
+            "title": "Journal",
+            "description": "What happened during the turn, in order."
+          }
+        },
+        "type": "object",
+        "required": [
+          "partie",
+          "journal"
+        ],
+        "title": "ReponseCombat"
+      },
+      "ReponseDeplacement": {
+        "properties": {
+          "partie": {
+            "$ref": "#/components/schemas/Partie"
+          },
+          "evenement": {
+            "$ref": "#/components/schemas/Evenement"
+          },
+          "dans_les_herbes": {
+            "type": "boolean",
+            "title": "Dans Les Herbes",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "partie",
+          "evenement",
+          "dans_les_herbes"
+        ],
+        "title": "ReponseDeplacement"
+      },
+      "ReponseInteraction": {
+        "properties": {
+          "partie": {
+            "$ref": "#/components/schemas/Partie"
+          },
+          "evenement": {
+            "$ref": "#/components/schemas/Evenement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "partie",
+          "evenement"
+        ],
+        "title": "ReponseInteraction"
+      },
+      "Starter": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "National Pokédex number."
+          },
+          "nom": {
+            "type": "string",
+            "title": "Nom",
+            "description": "PokéAPI (English) name, e.g. 'charmander'."
+          },
+          "nom_fr": {
+            "type": "string",
+            "title": "Nom Fr"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "minItems": 1,
+            "title": "Types"
+          },
+          "stats_base": {
+            "$ref": "#/components/schemas/Statistiques"
+          },
+          "attaques": {
+            "items": {
+              "$ref": "#/components/schemas/AttaqueDeBase"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Attaques"
+          },
+          "niveau": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Niveau"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "nom",
+          "nom_fr",
+          "types",
+          "stats_base",
+          "attaques",
+          "niveau"
+        ],
+        "title": "Starter",
+        "description": "A species offered at the start of the game, with its starting level."
+      },
+      "Statistiques": {
+        "properties": {
+          "pv": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Pv"
+          },
+          "attaque": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Attaque"
+          },
+          "defense": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Defense"
+          },
+          "attaque_spe": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Attaque Spe"
+          },
+          "defense_spe": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Defense Spe"
+          },
+          "vitesse": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Vitesse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "pv",
+          "attaque",
+          "defense",
+          "attaque_spe",
+          "defense_spe",
+          "vitesse"
+        ],
+        "title": "Statistiques",
+        "description": "The six battle stats. ``pv`` is the maximum HP."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
