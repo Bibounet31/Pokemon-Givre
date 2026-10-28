@@ -1,46 +1,66 @@
-# Yboost-B2 : jeu Pokémon web (RPG + roguelite)
+# Yboost-B2: a Pokémon web game (RPG + roguelite)
 
-Projet YBOOST B2. On explore un monde en vue de dessus, on affronte des dresseurs et deux champions, puis on termine par la Tour de Combat en mode roguelite.
+YBOOST B2 project. Explore a top-down world, beat the trainers and the two gym leaders, then finish the game
+by winning the 5 hard battles of the Battle Tower (roguelite).
 
-- **Backend** : Python, FastAPI, Pydantic. Les règles du jeu tournent côté serveur et les parties sont gardées en mémoire.
-- **Frontend** : Vite, React et TypeScript, en direction artistique « Pixel rétro ».
-- **Cartes** : faites avec Tiled (`assets/maps/`), tilesets Kenney (licence CC0).
+- **Backend**: Python 3.12+, FastAPI, Pydantic. Every game rule runs on the server; runs are kept in memory.
+- **Frontend**: Vite, React and strict TypeScript, "Pixel rétro" art direction.
+- **Maps**: made with Tiled (`assets/maps/`), Kenney tilesets (CC0).
+- **Pokémon data**: imported **once** from PokéAPI into `backend/data/`. The API never calls PokéAPI while playing.
 
-## Arborescence
+The team's reference (rules, state graph, backlog) is the Notion design doc.
+
+## Architecture
 
 ```
 backend/
-  api/          main.py (routes), cartes.py (lecture Tiled), schemas.py (contrat d'API)
-  data/         données du jeu en JSON (starters provisoires)
-  tests/        tests pytest
-frontend/
-  src/          App.tsx, api.ts, types.ts, sprites.ts, components/, hooks/
+  moteur/                 game rules: pure Python, no FastAPI (tested without a server)
+    regles.py             design constants: team size 3, 11 % encounters, 5 Tower battles…
+    modeles.py            Pydantic models of the game state (Partie, PokemonEquipe, CombatEnCours…)
+    cartes.py             Tiled map loading, O(1) tile lookups
+    donnees.py            reference data read once and cached (maps, starters)
+    pokemon.py            stats formula, creation of team Pokémon
+    exploration.py        moving and changing maps
+  api/                    HTTP layer only
+    main.py               create_app(): CORS + routers
+    routes/               one router per domain: catalogue, parties, exploration, combat
+    schemas.py            request/response bodies (contract v2)
+    dependances.py        PartieDep / PartieEnExploration…: 404 and 409 checks in one place
+    depot.py              in-memory store of the runs
+  scripts/
+    exporter_openapi.py   writes backend/openapi.json (source of the front-end types)
+  data/                   game data as JSON (starters are provisional until the PokéAPI import)
+  tests/                  pytest, one file per domain + the mode x route matrix
+  openapi.json            generated API contract, committed
+frontend/src/
+  api/                    client.ts (one function per route), types.ts (aliases of the generated types)
+  hooks/                  usePartie (run state and actions), useClavier (keyboard)
+  components/             one screen per mode: ChoixStarter, VueCarte + BoiteDialogue, EcranCombat, EcranFin
+  sprites.ts              Kenney sprite sheets and Pokémon sprite URLs
 assets/
-  maps/         13 cartes (.tmx = fichier de travail, .json = export lu par l'API), voir README_cartes.md
-  kenney_*/     tilesets
+  maps/                   13 maps (.tmx = Tiled work file, .json = export read by the API), see README_cartes.md
+  kenney_*/               tilesets
 ```
 
-## Lancer le projet
+Dependencies only go one way: `api` → `moteur`. A rule never imports FastAPI, and a route never contains a rule.
 
-Il faut **deux terminaux** : l'API sur le port 8000 et le front sur le port 5173.
+## Running the project
 
-### 1. API (Python 3.11 ou plus récent)
+Two terminals: the API on port 8000 and the front-end on port 5173.
+
+### 1. API (Python 3.12 or later)
 
 ```bash
 cd backend
-python -m venv .venv
-# Windows : .venv\Scripts\activate    macOS/Linux : source .venv/bin/activate
-pip install -r requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements-dev.txt
 uvicorn api.main:app --reload
 ```
 
-La documentation interactive est sur http://localhost:8000/docs. Pour lancer les tests :
+Interactive docs: http://localhost:8000/docs
 
-```bash
-pytest
-```
-
-### 2. Front (Node 20 ou plus récent)
+### 2. Front-end (Node 20 or later)
 
 ```bash
 cd frontend
@@ -48,29 +68,63 @@ npm install
 npm run dev
 ```
 
-Ouvrir http://localhost:5173. Le port 5173 est imposé, car c'est la seule origine autorisée par le CORS de l'API.
-Pour changer l'adresse de l'API, copier `.env.example` en `.env`.
+Open http://localhost:5173. Port 5173 is required: it is the only origin allowed by the API's CORS.
+To change the API URL, copy `.env.example` to `.env`.
 
-## Contrat d'API v1 (état actuel)
+## Checks before every pull request
 
-| Route | Mode requis | Réponse |
+```bash
+cd backend && pytest && ruff check . && ruff format --check .
+cd frontend && npm run build && npm run lint
+```
+
+`ruff format .` formats the Python code; `ruff check --fix .` fixes most lint errors.
+
+## API types (one contract, two languages)
+
+The TypeScript types are **generated** from the Pydantic models, never written by hand:
+
+1. change a model or a route in `backend/`;
+2. `python -m scripts.exporter_openapi` (from `backend/`) rewrites `backend/openapi.json`.
+   A test fails as long as this file is out of date;
+3. `npm run gen:api` (run automatically by `npm run dev` and `npm run build`) regenerates
+   `frontend/src/api/schema.d.ts` (git-ignored). TypeScript then shows every place to update.
+
+## API contract v2
+
+| Route | Required mode | Response |
 | --- | --- | --- |
-| `GET /starters` | aucun | les 3 starters |
-| `GET /maps/{map_id}` | aucun | calques `sol`/`decor`/`toits` et objets visibles. 404 si la carte est inconnue |
-| `POST /runs` | aucun | 201, nouvelle partie en mode `choix_starter` |
-| `GET /runs/{id}` | aucun | état de la partie. 404 si elle est inconnue |
-| `POST /runs/{id}/starter` `{"pokemon_id"}` | `choix_starter` | passe en `exploration`. 422 si l'id est invalide |
-| `POST /runs/{id}/move` `{"direction": "up"\|"down"\|"left"\|"right"}` | `exploration` | `evenement` : `deplace`, `bloque` ou `changement_carte` |
+| `GET /starters` | none | the 3 starters with base stats and moves |
+| `GET /maps/{map_id}` | none | `sol`/`decor`/`toits` layers and visible objects. 404 if unknown |
+| `POST /runs` `{"graine"?}` | none | 201, new run in `choix_starter` mode |
+| `GET /runs/{id}` | any | full state of the run. 404 if unknown |
+| `POST /runs/{id}/starter` `{"pokemon_id"}` | `choix_starter` | moves to `exploration`. 422 if not a starter |
+| `POST /runs/{id}/move` `{"direction"}` | `exploration` | `evenement`: `deplace`, `bloque` or `changement_carte` |
+| `POST /runs/{id}/interact` | `exploration` | `evenement` for the tile in front of the player. **501 until task 64** |
+| `POST /runs/{id}/battle/actions` `{"type": "attack" \| "switch" \| "item" \| "capture" \| "flee", …}` | `combat` | `partie` + `journal`. **501 until task 20** |
 
-- Appeler une route dans le mauvais mode renvoie **409**. Une entrée mal formée renvoie **422**.
-- Un échec de jeu, par exemple foncer dans un mur, **n'est pas une erreur** : la réponse est 200 avec `evenement.type = "bloque"`.
+- A route called in the wrong mode returns **409** and changes nothing. Malformed input returns **422**.
+  An unknown run or map returns **404**. Every error body is `{"detail": "..."}`.
+- A game failure (wall, empty chest, lost battle, failed escape) **is not an HTTP error**: it is a 200 with an `evenement`.
+- Every random draw uses the run's `graine` (seed), so a run can be replayed in the tests.
 
-À venir : `POST /runs/{id}/interact`, les rencontres dans les herbes, `POST /runs/{id}/battle/actions`.
+## Game rules decided by the team
 
-## Méthode de travail
+They live in `backend/moteur/regles.py`:
 
-- `main` : version stable, mise à jour en fin de jalon uniquement.
-- `dev` : branche d'intégration.
-- `feat/…`, `fix/…`, `chore/…` : une branche par tâche du backlog Notion, **créée depuis `dev`**, avec une PR vers `dev` relue par un camarade.
-- Messages de commit au format conventionnel : `feat(api): …`, `fix(front): …`, `chore: …`.
-- Avant d'ouvrir une PR : `pytest` passe, ainsi que `npm run build` et `npm run lint`.
+- team of **3** Pokémon; **11 %** chance of a wild encounter per step in tall grass;
+- wild Pokémon are drawn at random from the imported Pokédex; only the level range depends on the area;
+- a Pokémon Center restores HP but **not PP**: use **Ether** / **Max Ether** (Huile / Huile Max);
+- speed ties are decided at random;
+- the opponent AI gets better as the game goes on: random moves, then the most damaging move, then a Negamax
+  search from the [easyAI](https://github.com/Zulko/easyAI) library for the gym leaders and the Tower;
+- the game ends (`fin` mode) after the **5th** Battle Tower win.
+
+## Workflow
+
+- `main`: stable version, updated at the end of a milestone only (tag `v0.x`). `dev`: integration branch.
+- One branch per Notion task, **created from an up-to-date `dev`**: `feat/…`, `fix/…`, `chore/…`.
+- Conventional commits in French: `feat(api): …`, `fix(front): …`, `test(moteur): …`, `chore: …`.
+- Pull request to `dev` with the Notion task number, what changes and how to test; reviewed by a teammate
+  other than the author. Never push to `dev` or `main` directly, never rewrite their history.
+- Every new rule comes with its tests: invariants, mode x route matrix, 404/409/422 cases.
