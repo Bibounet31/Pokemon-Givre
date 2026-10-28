@@ -1,111 +1,228 @@
+/* "Pixel rétro" art direction: 4-green Game Boy palette. Reuse these tokens, never raw colours. */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --gb-0: #0f380f; /* ink, borders */
+  --gb-1: #306230; /* shadows */
+  --gb-2: #8bac0f;
+  --gb-3: #9bbc0f;
+  --fond: #e8edd9;
+  --titre: 'Press Start 2P', monospace;
+  --texte: 'VT323', monospace;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  font-family: var(--texte);
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--gb-0);
+  background: var(--fond);
+  -webkit-font-smoothing: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  min-height: 100vh;
+  background: var(--fond);
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
+.jeu {
+  max-width: 760px;
   margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+  gap: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 h1,
 h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+  font-family: var(--titre);
+  margin: 0;
+  line-height: 1.4;
 }
-
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: 18px;
 }
 h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
+  font-size: 14px;
+  margin-bottom: 16px;
 }
-p {
+
+.boite {
+  background: var(--gb-3);
+  border: 4px solid var(--gb-0);
+  box-shadow: 8px 8px 0 var(--gb-1);
+  padding: 16px 20px;
+}
+
+.titre {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.bouton {
+  font-family: var(--titre);
+  font-size: 12px;
+  color: var(--gb-3);
+  background: var(--gb-0);
+  border: 3px solid var(--gb-0);
+  box-shadow: 4px 4px 0 var(--gb-1);
+  padding: 12px 16px;
+  cursor: pointer;
+}
+.bouton:hover,
+.bouton:focus-visible {
+  background: var(--gb-1);
+  outline: none;
+}
+.bouton:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+.bouton.petit {
+  font-size: 10px;
+  padding: 8px 10px;
+}
+
+.starters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 16px;
+}
+.carte-starter {
+  font-family: var(--texte);
+  font-size: 22px;
+  color: var(--gb-0);
+  background: var(--gb-2);
+  border: 3px solid var(--gb-0);
+  box-shadow: 4px 4px 0 var(--gb-1);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+.carte-starter:hover,
+.carte-starter:focus-visible {
+  background: var(--gb-3);
+  outline: 3px dashed var(--gb-0);
+  outline-offset: 3px;
+}
+.carte-starter img {
+  image-rendering: pixelated;
+}
+.carte-starter .nom {
+  font-family: var(--titre);
+  font-size: 11px;
+  margin-top: 6px;
+}
+.carte-starter .types {
+  font-size: 18px;
+  text-transform: uppercase;
+}
+
+.cadre-ecran {
+  position: relative;
+  border: 6px solid var(--gb-0);
+  box-shadow: 8px 8px 0 var(--gb-1);
+  background: var(--gb-0);
+  align-self: center;
+  max-width: 100%;
+}
+.ecran-jeu {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.nom-zone {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-family: var(--titre);
+  font-size: 10px;
+  color: var(--gb-0);
+  background: var(--gb-3);
+  border: 3px solid var(--gb-0);
+  padding: 6px 8px;
+}
+
+.dialogue {
+  min-height: 72px;
+  font-size: 26px;
+}
+
+.erreur {
+  font-family: var(--texte);
+  font-size: 22px;
+  margin: 0;
+  padding: 10px 14px;
+  border: 3px solid var(--gb-0);
+  background: var(--gb-2);
+}
+
+/* ---------- battle screen ---------- */
+.combat {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.combat > .boite:nth-child(n + 3) {
+  grid-column: 1 / -1;
+}
+.boite-pokemon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.boite-pokemon img {
+  image-rendering: pixelated;
+}
+.boite-pokemon p {
   margin: 0;
 }
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+.boite-pokemon .nom {
+  font-family: var(--titre);
+  font-size: 11px;
+}
+.barre-pv {
+  width: 100%;
+  height: 14px;
+  border: 3px solid var(--gb-0);
+  background: var(--fond);
+}
+.attaques {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.bouton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.journal {
+  margin: 0;
+  padding-left: 40px;
+  max-height: 160px;
+  overflow-y: auto;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+@media (max-width: 560px) {
+  .combat,
+  .attaques {
+    grid-template-columns: 1fr;
+  }
 }

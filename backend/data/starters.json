@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1, "nom": "bulbasaur", "nom_fr": "Bulbizarre", "types": ["grass", "poison"], "niveau": 5,
+    "stats_base": {"pv": 45, "attaque": 49, "defense": 49, "attaque_spe": 65, "defense_spe": 65, "vitesse": 45},
+    "attaques": [{"id": "tackle", "pp": 35}, {"id": "growl", "pp": 40}]
+  },
+  {
+    "id": 4, "nom": "charmander", "nom_fr": "Salamèche", "types": ["fire"], "niveau": 5,
+    "stats_base": {"pv": 39, "attaque": 52, "defense": 43, "attaque_spe": 60, "defense_spe": 50, "vitesse": 65},
+    "attaques": [{"id": "scratch", "pp": 35}, {"id": "growl", "pp": 40}]
+  },
+  {
+    "id": 7, "nom": "squirtle", "nom_fr": "Carapuce", "types": ["water"], "niveau": 5,
+    "stats_base": {"pv": 44, "attaque": 48, "defense": 65, "attaque_spe": 50, "defense_spe": 64, "vitesse": 43},
+    "attaques": [{"id": "tackle", "pp": 35}, {"id": "tail-whip", "pp": 30}]
+  }
+]
