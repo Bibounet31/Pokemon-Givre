@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="9" height="8" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="4">
+ <properties>
+  <property name="titre" value="Maison de l'ermite"/>
+ </properties>
+ <tileset firstgid="1" name="roguelike" tilewidth="16" tileheight="16" spacing="1" tilecount="1767" columns="57">
+  <image source="../kenney_roguelike-rpg-pack/Spritesheet/roguelikeSheet_transparent.png" width="968" height="526"/>
+ </tileset>
+ <layer id="1" name="sol" width="9" height="8">
+  <data encoding="csv">
+120,120,120,120,120,120,120,120,120,
+120,120,120,120,120,120,120,120,120,
+120,120,120,120,120,120,120,120,120,
+120,120,120,120,120,120,120,120,120,
+120,120,120,120,120,120,120,120,120,
+120,120,120,120,120,120,120,120,120,
+120,120,120,120,120,120,120,120,120,
+120,120,120,120,120,120,120,120,120
+</data>
+ </layer>
+ <layer id="2" name="decor" width="9" height="8">
+  <data encoding="csv">
+701,699,699,699,699,699,699,699,702,
+757,874,874,874,874,874,874,874,757,
+757,869,869,869,869,869,869,869,757,
+757,26,26,0,0,0,0,142,757,
+757,0,0,0,0,0,0,0,757,
+757,0,0,0,0,0,0,551,757,
+757,0,0,0,0,0,0,0,757,
+758,699,699,699,984,699,699,699,759
+</data>
+ </layer>
+ <layer id="3" name="toits" width="9" height="8">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,160,0,0,0,0,
+0,0,0,0,217,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <layer id="4" name="collisions" width="9" height="8" visible="0">
+  <data encoding="csv">
+1471,1471,1471,1471,1471,1471,1471,1471,1471,
+1471,1471,1471,1471,1471,1471,1471,1471,1471,
+1471,1471,1471,1471,1471,1471,1471,1471,1471,
+1471,1471,1471,0,0,0,0,1471,1471,
+1471,0,0,0,1471,0,0,0,1471,
+1471,0,0,0,0,0,0,1471,1471,
+1471,0,0,0,0,0,0,0,1471,
+1471,1471,1471,1471,0,1471,1471,1471,1471
+</data>
+ </layer>
+ <layer id="5" name="herbes" width="9" height="8" visible="0">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup id="6" name="objets">
+  <object id="1" name="sortie" class="sortie" x="64" y="112" width="16" height="16">
+   <properties>
+    <property name="vers_carte" value="desert"/>
+    <property name="vers_x" type="int" value="5"/>
+    <property name="vers_y" type="int" value="17"/>
+   </properties>
+  </object>
+  <object id="2" name="ermite" class="pnj" x="64" y="64" width="16" height="16">
+   <properties>
+    <property name="sprite" type="int" value="433"/>
+    <property name="dialogue" value="Les jumeaux utilisent des types Sol et Roche. L'Eau et la Plante les battent !"/>
+   </properties>
+  </object>
+  <object id="3" name="maison-desert-coffre" class="coffre" x="112" y="80" width="16" height="16">
+   <properties>
+    <property name="objet" value="super-potion"/>
+   </properties>
+  </object>
+ </objectgroup>
+</map>

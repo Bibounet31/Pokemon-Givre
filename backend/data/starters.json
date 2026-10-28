@@ -1,0 +1,5 @@
+[
+  {"id": 1, "nom": "bulbasaur", "nom_fr": "Bulbizarre", "types": ["grass", "poison"], "niveau": 5},
+  {"id": 4, "nom": "charmander", "nom_fr": "Salamèche", "types": ["fire"], "niveau": 5},
+  {"id": 7, "nom": "squirtle", "nom_fr": "Carapuce", "types": ["water"], "niveau": 5}
+]

@@ -46,3 +46,5 @@ logs/
 *.swp
 .DS_Store
 Thumbs.db
+# Tiled
+*.tiled-session
