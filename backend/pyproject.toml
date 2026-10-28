@@ -1,0 +1,20 @@
+# Tool settings only: the backend is not packaged.
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "--strict-markers"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, imports, pyupgrade, bugbear, simplify, FastAPI best practices
+select = ["E", "W", "F", "I", "UP", "B", "SIM", "FAST"]
+# FAST003 does not see that `run_id` is read by the PartieDep dependencies (api/dependances.py).
+ignore = ["FAST003"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["api", "moteur", "scripts"]

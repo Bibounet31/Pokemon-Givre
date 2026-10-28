@@ -1,91 +1,120 @@
-"""Modèles Pydantic : ce que l'API reçoit et renvoie (contrat d'API v1)."""
+"""Request and response bodies of the API (contract v2).
+
+The game state itself (``Partie``, ``PokemonEquipe``…) lives in ``moteur.modeles``;
+this module only adds what is specific to HTTP.
+"""
+
 from __future__ import annotations
 
-from enum import Enum
-from typing import Any, Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-
-class Mode(str, Enum):
-    choix_starter = "choix_starter"
-    exploration = "exploration"
-    combat = "combat"
-    fin = "fin"
+from moteur.modeles import Direction, EntreeJournal, Evenement, Modele, Partie
+from moteur.regles import TAILLE_EQUIPE_MAX
 
 
-Direction = Literal["up", "down", "left", "right"]
+class Erreur(Modele):
+    """Body of every 4xx/5xx response."""
+
+    detail: str
 
 
-class Starter(BaseModel):
-    id: int
-    nom: str
-    nom_fr: str
-    types: list[str]
-    niveau: int
+# ---------- catalogue ----------
 
 
-class PokemonEquipe(BaseModel):
-    id: int
-    nom: str
-    nom_fr: str
-    niveau: int
+class Calques(Modele):
+    """Displayed tile layers, row by row (index = y * largeur + x). 0 = empty tile."""
+
+    sol: list[int]
+    decor: list[int]
+    toits: list[int] = Field(description="Drawn above the player.")
 
 
-class Position(BaseModel):
-    carte: str
-    x: int
-    y: int
-    orientation: Direction = "down"
+class ObjetVisible(Modele):
+    """An object the front-end draws (NPC, trainer, nurse, chest)."""
 
-
-class Partie(BaseModel):
-    id: str
-    mode: Mode
-    graine: int
-    position: Position
-    equipe: list[PokemonEquipe] = Field(default_factory=list)
-
-
-class NouvellePartie(BaseModel):
-    graine: int | None = None
-
-
-class ChoixStarter(BaseModel):
-    pokemon_id: int
-
-
-class Deplacement(BaseModel):
-    direction: Direction
-
-
-class Evenement(BaseModel):
-    """Ce qui s'est passé pendant l'action. Un mur n'est pas une erreur HTTP : c'est un événement."""
-    type: Literal["deplace", "bloque", "changement_carte"]
-    carte: str | None = None
-
-
-class ReponseDeplacement(BaseModel):
-    partie: Partie
-    evenement: Evenement
-    dans_les_herbes: bool = False
-
-
-class ObjetVisible(BaseModel):
     nom: str
     type: str
     x: int
     y: int
     largeur: int
     hauteur: int
-    proprietes: dict[str, Any]
+    proprietes: dict[str, str | int | float | bool]
 
 
-class CarteReponse(BaseModel):
+class CarteReponse(Modele):
     id: str
     titre: str
     largeur: int
     hauteur: int
     taille_tuile: int
-    calques: dict[str, list[int]]
+    calques: Calques
     objets: list[ObjetVisible]
+
+
+# ---------- runs ----------
+
+
+class NouvellePartie(Modele):
+    graine: int | None = Field(None, description="Fixed seed (tests, replays). Random when omitted.")
+
+
+class ChoixStarter(Modele):
+    pokemon_id: int
+
+
+# ---------- exploration ----------
+
+
+class Deplacement(Modele):
+    direction: Direction
+
+
+class ReponseDeplacement(Modele):
+    partie: Partie
+    evenement: Evenement
+    dans_les_herbes: bool = False
+
+
+class ReponseInteraction(Modele):
+    partie: Partie
+    evenement: Evenement
+
+
+# ---------- battle ----------
+
+
+class ActionAttaquer(Modele):
+    type: Literal["attack"]
+    move_id: str = Field(description="One of the active Pokémon's moves, e.g. 'water-gun'.")
+
+
+class ActionChanger(Modele):
+    type: Literal["switch"]
+    index: int = Field(ge=0, lt=TAILLE_EQUIPE_MAX, description="Index in partie.equipe.")
+
+
+class ActionObjet(Modele):
+    type: Literal["item"]
+    objet: str = Field(description="Item name from the bag, e.g. 'potion' or 'ether'.")
+    cible: int = Field(0, ge=0, lt=TAILLE_EQUIPE_MAX, description="Index in partie.equipe.")
+
+
+class ActionCapturer(Modele):
+    type: Literal["capture"]
+
+
+class ActionFuir(Modele):
+    type: Literal["flee"]
+
+
+ActionCombat = Annotated[
+    ActionAttaquer | ActionChanger | ActionObjet | ActionCapturer | ActionFuir,
+    Field(discriminator="type"),
+]
+
+
+class ReponseCombat(Modele):
+    partie: Partie
+    journal: list[EntreeJournal] = Field(description="What happened during the turn, in order.")
