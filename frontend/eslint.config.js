@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'src/api/schema.d.ts']), // schema.d.ts is generated (npm run gen:api)
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

@@ -6,9 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    strictPort: true, // le CORS de l'API n'autorise que ce port
+    strictPort: true, // the API's CORS only allows this port
     fs: {
-      // les tilesets Kenney sont dans ../assets (partagés avec Tiled et l'API)
+      // the Kenney tilesets are in ../assets (shared with Tiled and the API)
       allow: ['..'],
     },
   },

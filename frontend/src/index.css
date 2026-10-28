@@ -1,7 +1,7 @@
-/* Direction artistique « Pixel rétro » : palette Game Boy à 4 verts */
+/* "Pixel rétro" art direction: 4-green Game Boy palette. Reuse these tokens, never raw colours. */
 :root {
-  --gb-0: #0f380f; /* encre, bordures */
-  --gb-1: #306230; /* ombres */
+  --gb-0: #0f380f; /* ink, borders */
+  --gb-1: #306230; /* shadows */
   --gb-2: #8bac0f;
   --gb-3: #9bbc0f;
   --fond: #e8edd9;
@@ -171,4 +171,58 @@ h2 {
   padding: 10px 14px;
   border: 3px solid var(--gb-0);
   background: var(--gb-2);
+}
+
+/* ---------- battle screen ---------- */
+.combat {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.combat > .boite:nth-child(n + 3) {
+  grid-column: 1 / -1;
+}
+.boite-pokemon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.boite-pokemon img {
+  image-rendering: pixelated;
+}
+.boite-pokemon p {
+  margin: 0;
+}
+.boite-pokemon .nom {
+  font-family: var(--titre);
+  font-size: 11px;
+}
+.barre-pv {
+  width: 100%;
+  height: 14px;
+  border: 3px solid var(--gb-0);
+  background: var(--fond);
+}
+.attaques {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.bouton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.journal {
+  margin: 0;
+  padding-left: 40px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+@media (max-width: 560px) {
+  .combat,
+  .attaques {
+    grid-template-columns: 1fr;
+  }
 }
