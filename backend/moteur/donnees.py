@@ -6,6 +6,7 @@ PokéAPI is never called while playing: its data is imported once into
 
 from __future__ import annotations
 
+import json
 from functools import cache
 from pathlib import Path
 
@@ -31,3 +32,10 @@ def starters() -> dict[int, Starter]:
     """
     brut = (DOSSIER_DONNEES / "starters.json").read_bytes()
     return {s.id: s for s in TypeAdapter(list[Starter]).validate_json(brut)}
+
+
+@cache
+def types() -> dict[str, dict[str, float]]:
+    """Load and cache the Pokémon type effectiveness chart."""
+    chemin = DOSSIER_DONNEES / "types.json"
+    return json.loads(chemin.read_text(encoding="utf-8"))

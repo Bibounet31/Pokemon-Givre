@@ -1,29 +1,39 @@
-import json
-from pathlib import Path
-from fight.type_calculator import calculer_multiplicateur
+import pytest
+
+from moteur.types import calculer_multiplicateur
 
 
-chemin = Path(__file__).parent.parent / "data" / "types.json"
+def test_eau_contre_feu():
+    assert calculer_multiplicateur("water", ["fire"]) == 2
 
-with open(chemin, "r", encoding="utf-8") as fichier:
-    types = json.load(fichier)
 
-print("Feu contre Plante :", types["feu"]["plante"])
-print("Eau contre Feu :", types["eau"]["feu"])
-print("Normal contre Spectre :", types["normal"]["spectre"])
+def test_feu_contre_eau():
+    assert calculer_multiplicateur("fire", ["water"]) == 0.5
 
- 
-def test_super_efficace():
-    assert calculer_multiplicateur("feu", ["plante"]) == 2
+
+def test_normal_contre_spectre():
+    assert calculer_multiplicateur("normal", ["ghost"]) == 0
 
 
 def test_double_type():
-    assert calculer_multiplicateur("electrik", ["eau", "vol"]) == 4
+    assert calculer_multiplicateur("electric", ["water", "flying"]) == 4
 
 
-def test_immunite():
-    assert calculer_multiplicateur("normal", ["spectre"]) == 0
+def test_type_attaque_inconnu():
+    with pytest.raises(ValueError):
+        calculer_multiplicateur("unknown", ["fire"])
 
 
-def test_resistance_double():
-    assert calculer_multiplicateur("feu", ["eau", "dragon"]) == 0.25
+def test_type_adversaire_inconnu():
+    with pytest.raises(ValueError):
+        calculer_multiplicateur("fire", ["unknown"])
+
+
+def test_zero_type():
+    with pytest.raises(ValueError):
+        calculer_multiplicateur("fire", [])
+
+
+def test_trois_types():
+    with pytest.raises(ValueError):
+        calculer_multiplicateur("fire", ["water", "grass", "steel"])
