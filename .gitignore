@@ -48,3 +48,6 @@ logs/
 Thumbs.db
 # Tiled
 *.tiled-session
+
+# Notes personnelles de suivi des tâches
+GestionDuProjet.md

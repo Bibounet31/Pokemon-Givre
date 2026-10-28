@@ -10,7 +10,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, model_validator
 
 from .regles import NB_ATTAQUES_MAX, NB_COMBATS_TOUR, TAILLE_EQUIPE_MAX
 
@@ -29,9 +29,13 @@ Direction = Literal["up", "down", "left", "right"]
 
 class Modele(BaseModel):
     """Base of every model: fields with a default are always present in responses,
-    so the generated TypeScript types mark them as required (no needless ``?``)."""
+    so the generated TypeScript types mark them as required (no needless ``?``).
 
-    model_config = ConfigDict(json_schema_serialization_defaults_required=True)
+    ``validate_assignment``: ``pokemon.pv = -3`` raises instead of corrupting the run.
+    Changing a list in place (``partie.equipe.append(...)``) is not checked: reassign it instead.
+    """
+
+    model_config = ConfigDict(json_schema_serialization_defaults_required=True, validate_assignment=True)
 
 
 # ---------- reference data (never changes during a run) ----------
@@ -89,6 +93,12 @@ class AttaqueConnue(Modele):
     pp: int = Field(ge=0)
     pp_max: int = Field(ge=1)
 
+    @model_validator(mode="after")
+    def _pp_au_plus_pp_max(self) -> AttaqueConnue:
+        if self.pp > self.pp_max:
+            raise ValueError(f"pp ({self.pp}) > pp_max ({self.pp_max})")
+        return self
+
 
 class PokemonEquipe(Modele):
     """A Pokémon of a team (the player's or an opponent's)."""
@@ -101,6 +111,12 @@ class PokemonEquipe(Modele):
     stats: Statistiques = Field(description="Stats at the current level; stats.pv is the maximum HP.")
     pv: int = Field(ge=0, description="Current HP, between 0 and stats.pv.")
     attaques: list[AttaqueConnue] = Field(min_length=1, max_length=NB_ATTAQUES_MAX)
+
+    @model_validator(mode="after")
+    def _pv_au_plus_pv_max(self) -> PokemonEquipe:
+        if self.pv > self.stats.pv:
+            raise ValueError(f"pv ({self.pv}) > stats.pv ({self.stats.pv})")
+        return self
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -124,6 +140,12 @@ class CombatEnCours(Modele):
     actif_adverse: int = Field(0, ge=0, description="Index of the opponent's Pokémon in battle.")
     dresseur: str | None = Field(None, description="Trainer key 'carte/nom', None for a wild Pokémon.")
     numero_tour: int = Field(1, ge=1)
+
+    @model_validator(mode="after")
+    def _adversaire_actif_existe(self) -> CombatEnCours:
+        if self.actif_adverse >= len(self.adversaires):
+            raise ValueError(f"actif_adverse ({self.actif_adverse}) is outside the opposing team")
+        return self
 
 
 class ProgressionTour(Modele):
@@ -161,6 +183,7 @@ class Partie(Modele):
     id: str
     mode: Mode
     graine: int = Field(description="Seed of every random draw of the run, so it can be replayed.")
+    tirages: int = Field(0, ge=0, description="Actions that drew random numbers so far (see moteur.aleatoire).")
     position: Position
     equipe: list[PokemonEquipe] = Field(default_factory=list, max_length=TAILLE_EQUIPE_MAX)
     sac: dict[str, int] = Field(default_factory=dict, description="Item name -> quantity.")
@@ -169,3 +192,9 @@ class Partie(Modele):
     dernier_soin: Position | None = Field(None, description="Where a defeat sends the player back.")
     combat: CombatEnCours | None = None
     tour: ProgressionTour | None = Field(None, description="None when no Tower attempt is in progress.")
+
+    @model_validator(mode="after")
+    def _pokemon_actif_existe(self) -> Partie:
+        if self.combat is not None and self.combat.actif >= len(self.equipe):
+            raise ValueError(f"combat.actif ({self.combat.actif}) is outside the team")
+        return self

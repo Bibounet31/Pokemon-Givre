@@ -28,6 +28,6 @@ class DepotParties:
 depot = DepotParties()
 
 
-def get_depot() -> DepotParties:
+async def get_depot() -> DepotParties:
     """FastAPI dependency; tests can override it with ``app.dependency_overrides``."""
     return depot
