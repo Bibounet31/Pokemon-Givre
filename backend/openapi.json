@@ -1042,6 +1042,13 @@
             "title": "Graine",
             "description": "Seed of every random draw of the run, so it can be replayed."
           },
+          "tirages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Tirages",
+            "description": "Actions that drew random numbers so far (see moteur.aleatoire).",
+            "default": 0
+          },
           "position": {
             "$ref": "#/components/schemas/Position"
           },
@@ -1117,6 +1124,7 @@
           "id",
           "mode",
           "graine",
+          "tirages",
           "position",
           "equipe",
           "sac",

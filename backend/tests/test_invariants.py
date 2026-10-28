@@ -4,6 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from moteur import donnees
+from moteur.aleatoire import generateur
 from moteur.modeles import CombatEnCours, Partie, Position
 from moteur.pokemon import creer_pokemon
 
@@ -51,3 +52,19 @@ def test_pokemon_actif_doit_etre_dans_l_equipe():
     with pytest.raises(ValidationError):
         partie.combat = CombatEnCours(genre="sauvage", adversaires=[_pokemon()], actif=1)
     partie.combat = CombatEnCours(genre="sauvage", adversaires=[_pokemon()], actif=0)
+
+
+# ---------- seeded random draws ----------
+
+
+def test_chaque_action_a_son_propre_tirage():
+    partie = _partie()
+    tirages = [generateur(partie).random() for _ in range(5)]
+    assert len(set(tirages)) == 5
+    assert partie.tirages == 5
+
+
+def test_meme_graine_memes_tirages():
+    a, b = _partie(graine=42), _partie(graine=42)
+    assert [generateur(a).random() for _ in range(5)] == [generateur(b).random() for _ in range(5)]
+    assert generateur(_partie(graine=1)).random() != generateur(_partie(graine=2)).random()

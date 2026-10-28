@@ -6,4 +6,5 @@
 - ``donnees``: reference data cached in memory
 - ``pokemon``: stats and creation of team Pokémon
 - ``exploration``: moving on the map
+- ``aleatoire``: reproducible random draws from the run's seed
 """

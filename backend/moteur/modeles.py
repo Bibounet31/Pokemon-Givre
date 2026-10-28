@@ -183,6 +183,7 @@ class Partie(Modele):
     id: str
     mode: Mode
     graine: int = Field(description="Seed of every random draw of the run, so it can be replayed.")
+    tirages: int = Field(0, ge=0, description="Actions that drew random numbers so far (see moteur.aleatoire).")
     position: Position
     equipe: list[PokemonEquipe] = Field(default_factory=list, max_length=TAILLE_EQUIPE_MAX)
     sac: dict[str, int] = Field(default_factory=dict, description="Item name -> quantity.")
