@@ -26,14 +26,14 @@ def _position_de_depart() -> Position:
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
-def creer_partie(depot: DepotDep, demande: NouvellePartie | None = None) -> Partie:
+async def creer_partie(depot: DepotDep, demande: NouvellePartie | None = None) -> Partie:
     graine = demande.graine if demande and demande.graine is not None else random.randrange(2**31)
     partie = Partie(id=uuid.uuid4().hex, mode=Mode.choix_starter, graine=graine, position=_position_de_depart())
     return depot.ajouter(partie)
 
 
 @router.get("/{run_id}", responses=ERREUR_404)
-def lire_partie(partie: PartieDep) -> Partie:
+async def lire_partie(partie: PartieDep) -> Partie:
     return partie
 
 
@@ -41,7 +41,7 @@ def lire_partie(partie: PartieDep) -> Partie:
     "/{run_id}/starter",
     responses={**ERREURS_ACTION, 422: {"model": Erreur, "description": "Pokémon qui n'est pas un starter"}},
 )
-def choisir_starter(partie: PartieEnChoixStarter, choix: ChoixStarter) -> Partie:
+async def choisir_starter(partie: PartieEnChoixStarter, choix: ChoixStarter) -> Partie:
     starter = donnees.starters().get(choix.pokemon_id)
     if starter is None:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Ce Pokémon ne fait pas partie des starters")

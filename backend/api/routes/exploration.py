@@ -14,7 +14,7 @@ router = APIRouter(prefix="/runs/{run_id}", tags=["exploration"])
 
 
 @router.post("/move", responses=ERREURS_ACTION)
-def deplacer_joueur(partie: PartieEnExploration, deplacement: Deplacement) -> ReponseDeplacement:
+async def deplacer_joueur(partie: PartieEnExploration, deplacement: Deplacement) -> ReponseDeplacement:
     resultat = deplacer(partie, deplacement.direction, donnees.cartes())
     return ReponseDeplacement(partie=partie, evenement=resultat.evenement, dans_les_herbes=resultat.dans_les_herbes)
 
@@ -23,7 +23,7 @@ def deplacer_joueur(partie: PartieEnExploration, deplacement: Deplacement) -> Re
     "/interact",
     responses={**ERREURS_ACTION, 501: {"model": Erreur, "description": "Pas encore implémenté"}},
 )
-def interagir(partie: PartieEnExploration) -> ReponseInteraction:
+async def interagir(partie: PartieEnExploration) -> ReponseInteraction:
     """Talk to an NPC, open a chest, heal or challenge a trainer on the tile in front of the player.
 
     Contract only: implemented by Notion task 64.
