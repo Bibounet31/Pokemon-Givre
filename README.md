@@ -80,6 +80,9 @@ cd frontend && npm run build && npm run lint
 
 `ruff format .` formats the Python code; `ruff check --fix .` fixes most lint errors.
 
+The same checks run on GitHub Actions (`.github/workflows/ci.yml`) for every pull request and push to `dev`
+and `main`. A pull request is only merged when the CI is green.
+
 ## API types (one contract, two languages)
 
 The TypeScript types are **generated** from the Pydantic models, never written by hand:
