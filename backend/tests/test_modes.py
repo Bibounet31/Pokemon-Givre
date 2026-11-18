@@ -45,15 +45,12 @@ def test_get_run_marche_dans_tous_les_modes(client, partie):
         assert client.get(f"/runs/{partie['id']}").status_code == 200
 
 
-@pytest.mark.parametrize(
-    ("chemin", "corps"),
-    [("/runs/{id}/interact", None), ("/runs/{id}/battle/actions", {"type": "attack", "move_id": "scratch"})],
-)
-def test_routes_a_venir_501(client, partie_exploration, chemin, corps):
-    """Contract v2 routes not implemented yet answer 501 in the right mode."""
-    if "battle" in chemin:
-        forcer_mode(partie_exploration["id"], Mode.combat)
-    assert client.post(chemin.format(id=partie_exploration["id"]), json=corps).status_code == 501
+def test_route_a_venir_501(client, partie_exploration):
+    """A contract v2 route not implemented yet answers 501 in the right mode."""
+    forcer_mode(partie_exploration["id"], Mode.combat)
+    r = client.post(f"/runs/{partie_exploration['id']}/battle/actions", json={"type": "attack", "move_id": "scratch"})
+    assert r.status_code == 501
+
 
 
 def test_action_de_combat_inconnue_422(client, partie):

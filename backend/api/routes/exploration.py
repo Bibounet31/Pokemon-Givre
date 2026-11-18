@@ -6,6 +6,8 @@ from fastapi import APIRouter, HTTPException, status
 
 from moteur import donnees
 from moteur.exploration import deplacer
+from moteur.interaction import InteractionNonDisponible
+from moteur.interaction import interagir as interagir_devant
 
 from ..dependances import ERREURS_ACTION, PartieEnExploration
 from ..schemas import Deplacement, Erreur, ReponseDeplacement, ReponseInteraction
@@ -28,4 +30,8 @@ async def interagir(partie: PartieEnExploration) -> ReponseInteraction:
 
     Contract only: implemented by Notion task 64.
     """
-    raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, detail="Interaction pas encore disponible (tâche 64)")
+    try:
+        evenement = interagir_devant(partie, donnees.cartes())
+    except InteractionNonDisponible as erreur:
+        raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED, detail=str(erreur)) from erreur
+    return ReponseInteraction(partie=partie, evenement=evenement)
